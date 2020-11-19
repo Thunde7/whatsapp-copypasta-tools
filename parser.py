@@ -16,7 +16,7 @@ MESSEGE_RE = re.compile(r"(\d{1,2}\/\d{1,2}\/\d{1,2}.*?)(?=^^(\d{1,2}\/\d{1,2}\/
 ######
 parser = argparse.ArgumentParser(
     description='Parsing Module for the bot',
-    usage='python parser.py INPUT OUTPUT [-h] [-l] [-d]'
+    usage='python parser.py INPUT OUTPUT [-h] [-l] [-d] [-b] [-w]'
 )
 
 parser.add_argument('src',
@@ -41,6 +41,20 @@ parser.add_argument(
     '--debug',
     required=False,
     help='DEBUG MODE, Enables prints'
+)
+
+parser.add_argument(
+    '-b',
+    '--best',
+    required=False,
+    help='Find who sent most copypastas'
+)
+
+parser.add_argument(
+    '-w',
+    '--worst',
+    required=False,
+    help='Find who sent most non copypastas'
 )
 
 args = parser.parse_args()
@@ -91,18 +105,29 @@ def calc_stats(dic):
     leaderboard.sort(reverse=True,key=lambda x: x[1])
     return leaderboard
 
+def numbers_with_most_cp(dic):
+    leaderboard = []
+    for number,stats in dic.items():
+        leaderboard.append((number,stats[True]))
+    leaderboard.sort(reverse=True,key=lambda x: x[1])
+    return leaderboard
+
+def numbers_with_most_non_cp(dic):
+    leaderboard = []
+    for number,stats in dic.items():
+        leaderboard.append((number,stats[False]))
+    leaderboard.sort(reverse=True,key=lambda x: x[1])
+    return leaderboard
 
 ######
 #MAIN#
 ######
 
-if args.leaderboard:
-    leads = {}
-
-if args.debug:
-    lost = 0
 
 
+lost = 0
+pastas = 0
+leads = {}
 result = {}
 
 for messege in messeges:
@@ -110,14 +135,15 @@ for messege in messeges:
     if parsed:
         date_and_time, number, text = parsed
         is_copypasta = is_long(text)
-        if args.leaderboard:
-            add_to_stats(leads,number,is_copypasta)
+        add_to_stats(leads,number,is_copypasta)
         if is_copypasta:
             result[date_and_time] = text
-    elif args.debug: lost += 1
+            pastas += 1
+    else: lost += 1
 
 if args.debug:
     print(f"we didn't parse {lost} messeges!")
+    print(f"we have found {pastas} copypastas")
 
 with open(args.out,"w",encoding="utf-8") as out:
     out.write(json.dumps(result,indent=2))
@@ -126,3 +152,14 @@ if args.leaderboard:
     with open("leads.txt","w",encoding="utf-8") as out:
         out.write("\n".join(f"{i+1} : {entry[0]} with a ratio of {entry[1]} copypastas per non pastas"
         for i, entry in enumerate(calc_stats(leads)) if entry[1] != 0.0))
+
+if args.best:
+    with open("best.txt","w",encoding="utf-8") as out:
+        out.write("\n".join(f"{i+1} : {entry[0]} with {entry[1]} copypastas"
+        for i, entry in enumerate(numbers_with_most_cp(leads)) if entry[1] != 0))
+
+if args.worst:
+    with open("worst.txt","w",encoding="utf-8") as out:
+        out.write("\n".join(f"{i+1} : {entry[0]} with {entry[1]} non copypastas"
+        for i, entry in enumerate(numbers_with_most_non_cp(leads)) if entry[1] != 0))
+
