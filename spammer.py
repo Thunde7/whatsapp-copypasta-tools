@@ -49,7 +49,9 @@ def read_from_json(dir):
             data = json.load(input)
     except FileNotFoundError:
         print(f"trouble reading from {dir}")
-    return data.values()
+    res = data.values()
+    random.shuffle(res)
+    return res
 
 def read_from_text(dir):
     data = ""

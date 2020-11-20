@@ -34,7 +34,7 @@ optional arguments:
   -d, --debug  DEBUG mode, Enables prints
 ```
 
-alternativly, you can use:
+alternatively, you can use:
 ```
 python parser.py INPUT OUTPUT [-h] [-l] [-d] [-b] [-w]
 
@@ -77,4 +77,3 @@ optional arguments:
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-Please make sure to update tests as appropriate.
