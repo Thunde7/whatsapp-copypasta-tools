@@ -15,14 +15,15 @@ parser.add_argument('src',
 
 parser.add_argument('out',
     metavar='OUTPUT',
-    help='file to writr results to'
+    help='file to write results to'
 )
 
 parser.add_argument(
     "-d",
     "--debug",
     required=False,
-    action="store_true"
+    action="store_true",
+    help="DEBUG mode, Enables prints"
 )
 
 if __name__ == "__main__":

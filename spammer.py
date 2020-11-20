@@ -15,16 +15,16 @@ import json
 ######
 parser = argparse.ArgumentParser(
     description='Parsing Module for the bot',
-    usage='python spammer.py [-d] [-t] [-j]'
+    usage='python spammer.py [-d] [-t] [-j]',
 )
 
-
-# parser.add_argument(
-#     '-d',
-#     '--debug',
-#     required=False,
-#     help='DEBUG MODE, Enables prints'
-# )
+parser.add_argument(
+    '-d',
+    '--debug',
+    required=False,
+    help='DEBUG MODE, Enables prints',
+    action="store_true"
+)
 
 parser.add_argument(
     "-j",

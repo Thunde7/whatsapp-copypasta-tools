@@ -33,28 +33,32 @@ parser.add_argument(
     '-l',
     '--leaderboard',
     required=False,
-    help="Leaderboard generator"
+    help="Leaderboard generator",
+    action="store_true"
 )
 
 parser.add_argument(
     '-d',
     '--debug',
     required=False,
-    help='DEBUG MODE, Enables prints'
+    help='DEBUG MODE, Enables prints',
+    action="store_true"
 )
 
 parser.add_argument(
     '-b',
     '--best',
     required=False,
-    help='Find who sent most copypastas'
+    help='Find who sent most copypastas',
+    action="store_true"
 )
 
 parser.add_argument(
     '-w',
     '--worst',
     required=False,
-    help='Find who sent most non copypastas'
+    help='Find who sent most non copypastas',
+    action="store_true"
 )
 
 args = parser.parse_args()
