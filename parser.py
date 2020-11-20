@@ -1,3 +1,6 @@
+#########
+#IMPORTS#
+#########
 import argparse
 import json
 import sys
@@ -8,8 +11,6 @@ import os
 #CONSTS#
 ########
 MESSEGE_RE = re.compile(r"(\d{1,2}\/\d{1,2}\/\d{1,2}.*?)(?=^^(\d{1,2}\/\d{1,2}\/\d{1,2}|\Z))",re.S | re.M)
-
-
 
 ######
 #ARGS#
@@ -147,7 +148,7 @@ if args.debug:
     print(f"we have found {pastas} copypastas")
 
 with open(args.out,"w",encoding="utf-8") as out:
-    out.write(json.dumps(result,indent=2))
+    out.write(json.dumps(result,indent=2,ensure_ascii=False))
 
 if args.leaderboard:
     with open("leads.txt","w",encoding="utf-8") as out:
