@@ -64,7 +64,8 @@ args = parser.parse_args()
 ######
 try:
     with open(args.src,"r",encoding="utf-8") as input:
-        messeges = [m.group(1).strip().replace("\n",os.path.sep) for m in MESSEGE_RE.finditer(input.read())]
+        messeges = [m.group(1).strip()#.replace("\n",os.path.sep)
+                    for m in MESSEGE_RE.finditer(input.read())]
     if args.debug:
         print(f"we found {len(messeges)} possible messeges!")
 
@@ -82,14 +83,14 @@ def parse_messege(messege):
         splitted = messege.split(":")
         date_and_time = splitted[0] + ":" + splitted[1][:2]
         number = "-".join(splitted[1].split("-")[1:]).strip()
-        text = splitted[2]
+        text = ":".join(splitted[2:])
         return date_and_time,number,text
 
     except IndexError:
         return None
     
 
-def is_long(text,size=50):
+def is_long(text,size=100):
     return len(text.split()) > size
 
 def add_to_stats(dic,number,is_copypasta):
