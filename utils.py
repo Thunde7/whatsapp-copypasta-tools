@@ -4,7 +4,7 @@ import re
 
 MESSEGE_RE = re.compile(r"(\d{1,2}\/\d{1,2}\/\d{1,2}.*?)(?=^^(\d{1,2}\/\d{1,2}\/\d{1,2}|\Z))",re.S | re.M)
 # TODO
-# EMOJI_RE =
+# EMOJI_RE = re.compile(r'\d+(.*?)[\u263a-\U0001f645]')
 
 def messeges_generator_from_file(filename,debug):
     try:
@@ -57,7 +57,7 @@ def calc_stats_order_by_false(stat_dict):
 
 def write_messeges_to_json(filename,messeges):
     with open(filename,"w",encoding="utf-8") as out:
-        out.write(json.dumps(messeges,indent=2,ensure_ascii=False))
+        out.write(json.dumps(list(messeges),indent=2,ensure_ascii=False))
 
 def write_all_stats(stat_dict):
     with open("leaderboard.txt","w",encoding="utf-8") as out:
@@ -69,3 +69,22 @@ def write_all_stats(stat_dict):
     with open("most_non_copypastas.txt","w",encoding="utf-8") as out:
         out.write("\n".join(f"{i+1}: {entry[0]} with {entry[1]} non copypastas" 
                 for i,entry in enumerate(calc_stats_order_by_false(stat_dict)) if entry[1] != 0))    
+
+
+def read_from_json(dir):
+    data = list()
+    try:
+        with open(dir,"r",encoding="utf-8") as input:
+            data = json.load(input)
+    except FileNotFoundError:
+        print(f"trouble reading from {dir}")
+    return data
+
+def read_from_text(dir):
+    data = ""
+    try:
+        with open(dir,"r",encoding="utf-8") as input:
+            data += input.read()
+    except FileNotFoundError:
+        print(f"trouble reading from {dir}")
+    return data.split()
