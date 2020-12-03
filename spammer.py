@@ -3,7 +3,7 @@
 #########
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from string import ascii_lowercase
+from string import ascii_letters, ascii_lowercase
 
 import pyperclip
 import argparse
@@ -48,6 +48,8 @@ def shuffle_from_file(dir):
     random.shuffle(res)
     return res
 
+def get_random_word():
+    return "".join(random.choice(ascii_letters) for _ in range(random.randint(3,10)))
 
 def spam_maker(args):
     if args.json:
@@ -55,7 +57,7 @@ def spam_maker(args):
     elif args.text:
         spam = utils.read_from_text(args.text)
     else:
-        spam = [random.choice(ascii_lowercase) for _ in range(12)]
+        spam = [" ".join(get_random_word() for _ in range(400)) for _ in range(2000)]
     return spam
 
 
