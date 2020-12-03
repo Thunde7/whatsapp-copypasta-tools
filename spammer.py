@@ -9,8 +9,14 @@ from string import ascii_letters, ascii_lowercase
 import pyperclip
 import argparse
 import random
-import json
 import time
+
+import sys
+if sys.platform == "win32":
+    chrome_driver = '.\\drivers\\chromedriver.exe'
+else:
+    chrome_driver = './drivers/chromedriver'
+
 
 import utils
 ######
@@ -68,7 +74,9 @@ def spam_maker(args):
 chrome_options = Options()
 chrome_options.add_argument("user-data-dir=selenium") 
 
-driver = webdriver.Chrome('C:\\webdrivers\\chromedriver.exe', chrome_options = chrome_options)
+driver = webdriver.Chrome(
+    chrome_driver,
+    chrome_options = chrome_options)
 driver.implicitly_wait(20) 
 driver.get('https://web.whatsapp.com')
 input(f"{50 * '='}\npress enter after you have scanned the QR\n{50 * '='}\n")

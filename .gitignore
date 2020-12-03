@@ -3,3 +3,4 @@
 *.old
 *.log
 __pycache__/*
+selenium/*
