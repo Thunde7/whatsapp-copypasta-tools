@@ -3,17 +3,22 @@
 #########
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
 from string import ascii_letters, ascii_lowercase
 
 import pyperclip
 import argparse
 import random
 import json
+import time
 
 import utils
 ######
 #ARGS#
 ######
+
+
+
 parser = argparse.ArgumentParser(
     description='Parsing Module for the bot',
     usage='python spammer.py [-d] [-t] [-j]',
@@ -60,8 +65,10 @@ def spam_maker(args):
         spam = [" ".join(get_random_word() for _ in range(400)) for _ in range(2000)]
     return spam
 
+chrome_options = Options()
+chrome_options.add_argument("user-data-dir=selenium") 
 
-driver = webdriver.Chrome('C:\\webdrivers\\chromedriver.exe')
+driver = webdriver.Chrome('C:\\webdrivers\\chromedriver.exe', chrome_options = chrome_options)
 driver.implicitly_wait(20) 
 driver.get('https://web.whatsapp.com')
 input(f"{50 * '='}\npress enter after you have scanned the QR\n{50 * '='}\n")
@@ -75,3 +82,5 @@ for spam in spam_maker(args):
     pyperclip.copy(spam)
     driver.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[2]/div/div[2]').send_keys(Keys.CONTROL,"v")
     driver.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[3]/button').click()
+
+time.sleep(2)
