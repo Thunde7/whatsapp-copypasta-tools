@@ -3,20 +3,16 @@
 #########
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.options import Options as chOptions
+from selenium.webdriver.firefox.options import Options as fiOptions
 from string import ascii_letters, ascii_lowercase
+import selenium
 
 import pyperclip
 import argparse
 import random
+import json
 import time
-
-import sys
-if sys.platform == "win32":
-    chrome_driver = '.\\drivers\\chromedriver.exe'
-else:
-    chrome_driver = './drivers/chromedriver'
-
 
 import utils
 ######
@@ -27,7 +23,7 @@ import utils
 
 parser = argparse.ArgumentParser(
     description='Parsing Module for the bot',
-    usage='python spammer.py [-d] [-t] [-j]',
+    usage='python spammer.py [-d] [-t] [-j] [-n] [-p path] [-f -p path]',
 )
 
 parser.add_argument(
@@ -52,6 +48,29 @@ parser.add_argument(
     help="the text file to read the spam from"
 )
 
+parser.add_argument(
+    "-n",
+    "--name",
+    required=False,
+    help="the name of the victim"
+)
+
+parser.add_argument(
+    "-p",
+    "--path",
+    required=False,
+    help="path for the webdriver",
+    default='./drivers/chromedriver.exe'
+)
+
+parser.add_argument(
+    '-f',
+    '--firefox',
+    required=False,
+    help='use firefox instead of chrome',
+    action="store_true"
+)
+
 args = parser.parse_args()
 
 def shuffle_from_file(dir):
@@ -71,24 +90,54 @@ def spam_maker(args):
         spam = [" ".join(get_random_word() for _ in range(400)) for _ in range(2000)]
     return spam
 
-chrome_options = Options()
-chrome_options.add_argument("user-data-dir=selenium") 
 
-driver = webdriver.Chrome(
-    chrome_driver,
-    chrome_options = chrome_options)
-driver.implicitly_wait(20) 
+if args.firefox:
+    options = fiOptions()
+    options.add_argument("user-data-dir=selenium")  
+    driver = webdriver.Firefox(executable_path= args.path, options=options) 
+else:
+    options = chOptions()
+    options.add_argument("user-data-dir=selenium")   
+    driver = webdriver.Chrome(executable_path= args.path, options=options) 
+    
 driver.get('https://web.whatsapp.com')
-input(f"{50 * '='}\npress enter after you have scanned the QR\n{50 * '='}\n")
+
+while True:
+    try:
+        driver.find_element_by_xpath(f'//*[@contenteditable = "true"]')
+        break
+    except selenium.common.exceptions.NoSuchElementException:
+        continue
+print("Connected successfully!")
+time.sleep(2)
+
+def chat(name):
+    try:
+        driver.find_element_by_xpath(f'//span[@title="{name}"]').click()
+        name=name
+    except selenium.common.exceptions.NoSuchElementException:
+        driver.close()
+        raise Exception(f"No chat named {name}")
+
+def send_message(msg):
+    chat_box = driver.find_element_by_xpath('/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]')
+    chat_box.click()
+    chat_box.send_keys(msg+ Keys.ENTER)
 
 #
 #victim = input("who we spamming boissssssssss\n\n")
 #driver.find_element_by_css_selector(f'span[title="{victim}"]').click()
-input(f"{50 * '='}\npress enter after you have chose the victim\n{50 * '='}\n")
+
+if args.name is not None:
+    chat(args.name)
+else:
+    input(f"{50 * '='}\npress enter after you have chose the victim\n{50 * '='}\n")
 
 for spam in spam_maker(args):
-    pyperclip.copy(spam)
-    driver.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[2]/div/div[2]').send_keys(Keys.CONTROL,"v")
-    driver.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[3]/button').click()
-
-time.sleep(2)
+    try:
+        send_message(spam)
+    except KeyboardInterrupt:
+        driver.close()
+    except Exception as ex:
+        print(ex)
+        driver.close()
