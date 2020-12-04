@@ -13,6 +13,7 @@ import argparse
 import random
 import json
 import time
+import sys
 
 import utils
 ######
@@ -60,7 +61,7 @@ parser.add_argument(
     "--path",
     required=False,
     help="path for the webdriver",
-    default='./drivers/chromedriver.exe'
+    default= '.\\drivers\\chromedriver.exe' if sys.platform == "win32" else './drivers/chromedriver'
 )
 
 parser.add_argument(
