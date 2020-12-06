@@ -2,7 +2,7 @@ import json
 import re
 
 
-MESSEGE_RE = re.compile(r"(\d{1,2}\/\d{1,2}\/\d{1,2}.*?)(?=^^(\d{1,2}\/\d{1,2}\/\d{1,2}|\Z))",re.S | re.M)
+MESSEGE_RE = re.compile(r"(\d{1,2}[- . /]\d{1,2}[- . /]\d{1,2}.*?)(?=^^(\d{1,2}[- . /]\d{1,2}[- . /]\d{1,2}|\Z))",re.S | re.M)
 # TODO
 # EMOJI_RE = re.compile(r'\d+(.*?)[\u263a-\U0001f645]')
 
