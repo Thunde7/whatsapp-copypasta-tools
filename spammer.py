@@ -21,7 +21,6 @@ import utils
 ######
 
 
-
 parser = argparse.ArgumentParser(
     description='Parsing Module for the bot',
     usage='python spammer.py [-d] [-t] [-j] [-n] [-p path] [-f -p path]',
@@ -61,7 +60,7 @@ parser.add_argument(
     "--path",
     required=False,
     help="path for the webdriver",
-    default= '.\\drivers\\chromedriver.exe' if sys.platform == "win32" else './drivers/chromedriver'
+    default='.\\drivers\\chromedriver.exe' if sys.platform == "win32" else './drivers/chromedriver'
 )
 
 parser.add_argument(
@@ -74,13 +73,16 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+
 def shuffle_from_file(dir):
     res = list(utils.read_from_json(dir))
     random.shuffle(res)
     return res
 
+
 def get_random_word():
-    return "".join(random.choice(ascii_letters) for _ in range(random.randint(3,10)))
+    return "".join(random.choice(ascii_letters) for _ in range(random.randint(3, 10)))
+
 
 def spam_maker(args):
     if args.json:
@@ -88,19 +90,20 @@ def spam_maker(args):
     elif args.text:
         spam = utils.read_from_text(args.text)
     else:
-        spam = [" ".join(get_random_word() for _ in range(400)) for _ in range(2000)]
+        spam = [" ".join(get_random_word() for _ in range(400))
+                for _ in range(2000)]
     return spam
 
 
 if args.firefox:
     options = fiOptions()
-    options.add_argument("user-data-dir=selenium")  
-    driver = webdriver.Firefox(executable_path= args.path, options=options) 
+    options.add_argument("user-data-dir=selenium")
+    driver = webdriver.Firefox(executable_path=args.path, options=options)
 else:
     options = chOptions()
-    options.add_argument("user-data-dir=selenium")   
-    driver = webdriver.Chrome(executable_path= args.path, options=options) 
-    
+    options.add_argument("user-data-dir=selenium")
+    driver = webdriver.Chrome(executable_path=args.path, options=options)
+
 driver.get('https://web.whatsapp.com')
 
 while True:
@@ -112,22 +115,26 @@ while True:
 print("Connected successfully!")
 time.sleep(2)
 
+
 def chat(name):
     try:
         driver.find_element_by_xpath(f'//span[@title="{name}"]').click()
-        name=name
+        name = name
     except selenium.common.exceptions.NoSuchElementException:
         driver.close()
         raise Exception(f"No chat named {name}")
 
+
 def send_message(msg):
-    chat_box = driver.find_element_by_xpath('/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]')
+    chat_box = driver.find_element_by_xpath(
+        '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]')
     chat_box.click()
-    chat_box.send_keys(msg+ Keys.ENTER)
+    chat_box.send_keys(msg + Keys.ENTER)
 
 #
 #victim = input("who we spamming boissssssssss\n\n")
-#driver.find_element_by_css_selector(f'span[title="{victim}"]').click()
+# driver.find_element_by_css_selector(f'span[title="{victim}"]').click()
+
 
 if args.name is not None:
     chat(args.name)
