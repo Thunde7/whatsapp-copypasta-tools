@@ -129,7 +129,9 @@ def send_message(msg):
     chat_box = driver.find_element_by_xpath(
         '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]')
     chat_box.click()
-    chat_box.send_keys(msg + Keys.ENTER)
+    pyperclip.copy(msg)
+    chat_box.send_keys(Keys.CONTROL + "v")
+    chat_box.send_keys(Keys.ENTER)
 
 #
 #victim = input("who we spamming boissssssssss\n\n")
