@@ -12,12 +12,15 @@ python stats.py INPUT [-d]
 stats module
 
 positional arguments:
-  INPUT        the exported file
+  INPUT        the exported file from whatsapp
 
 optional arguments:
   -h, --help   show this help message and exit
   -d, --debug  DEBUG mode, Enables prints
 ```
+and you will get three files with rankings related to best copypasta/noncopypasta ratio, most copypastas and most not copypastas
+
+
 or:
 
 ```
@@ -26,31 +29,29 @@ python gen_json.py INPUT OUTPUT [-d]
 Generate Pasta json from exported chat
 
 positional arguments:
-  INPUT        exported file
+  INPUT        the exported file from whatsapp
   OUTPUT       file to write results to
 
 optional arguments:
   -h, --help   show this help message and exit
   -d, --debug  DEBUG mode, Enables prints
 ```
+and you will get a json file with all the copypastas from you whatsapp export, in the following format:
 
-alternatively, you can use:
 ```
-python parser.py INPUT OUTPUT [-h] [-l] [-d] [-b] [-w]
-
-Parsing Module for the bot
-
-positional arguments:
-  INPUT              exported file
-  OUTPUT             file to writr results to
-
-optional arguments:
-  -h, --help         show this help message and exit
-  -l, --leaderboard  Leaderboard generator
-  -d, --debug        DEBUG MODE, Enables prints
-  -b, --best         Find who sent most copypastas
-  -w, --worst        Find who sent most non copypastas
+[
+      spam_1,
+      spam_2,
+      spam_3,
+      .
+      .
+      .
+      spam_n
+  ]
 ```
+
+
+
 
 Finally, you can use the spam module with:
 ```
@@ -62,15 +63,15 @@ optional arguments:
   -h, --help            show this help message and exit
   -d, --debug           DEBUG MODE, Enables prints
   -j JSON, --json JSON  the json file to read the spam from, should look somthing like this:
-  {
-      key_1 : spam_1,
-      key_2 : spam_2,
-      key_3 : spam_3,
+  [
+      spam_1,
+      spam_2,
+      spam_3,
       .
       .
       .
-      key_n : spam_n
-  }
+      spam_n
+  ]
   -t TEXT, --text TEXT  the text file to read the spam from, any text file will do
 ```
 

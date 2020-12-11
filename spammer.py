@@ -5,22 +5,20 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options as chOptions
 from selenium.webdriver.firefox.options import Options as fiOptions
-from string import ascii_letters, ascii_lowercase
+from string import ascii_letters
 import selenium
 
 import pyperclip
 import argparse
 import random
-import json
 import time
 import sys
 
-import utils
+import file_utils
+
 ######
 #ARGS#
 ######
-
-
 parser = argparse.ArgumentParser(
     description='Parsing Module for the bot',
     usage='python spammer.py [-d] [-t] [-j] [-n] [-p path] [-f -p path]',
@@ -74,8 +72,11 @@ parser.add_argument(
 args = parser.parse_args()
 
 
+###########
+#FUNCTIONS#
+###########
 def shuffle_from_file(dir):
-    res = list(utils.read_from_json(dir))
+    res = list(file_utils.read_from_json(dir))
     random.shuffle(res)
     return res
 
@@ -88,7 +89,7 @@ def spam_maker(args):
     if args.json:
         spam = shuffle_from_file(args.json)
     elif args.text:
-        spam = utils.read_from_text(args.text)
+        spam = file_utils.read_from_text(args.text)
     else:
         spam = [" ".join(get_random_word() for _ in range(400))
                 for _ in range(2000)]
@@ -133,21 +134,18 @@ def send_message(msg):
     chat_box.send_keys(Keys.CONTROL + "v")
     chat_box.send_keys(Keys.ENTER)
 
-#
-#victim = input("who we spamming boissssssssss\n\n")
-# driver.find_element_by_css_selector(f'span[title="{victim}"]').click()
 
+if __name__ == "__main__":
+    if args.name is not None:
+        chat(args.name)
+    else:
+        input(f"{50 * '='}\npress enter after you have chose the victim\n{50 * '='}\n")
 
-if args.name is not None:
-    chat(args.name)
-else:
-    input(f"{50 * '='}\npress enter after you have chose the victim\n{50 * '='}\n")
-
-for spam in spam_maker(args):
-    try:
-        send_message(spam)
-    except KeyboardInterrupt:
-        driver.close()
-    except Exception as ex:
-        print(ex)
-        driver.close()
+    for spam in spam_maker(args):
+        try:
+            send_message(spam)
+        except KeyboardInterrupt:
+            driver.close()
+        except Exception as ex:
+            print(ex)
+            driver.close()

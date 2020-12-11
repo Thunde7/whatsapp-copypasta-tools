@@ -2,5 +2,6 @@
 *.txt
 *.old
 *.log
+data/*
 __pycache__/*
 selenium/*
