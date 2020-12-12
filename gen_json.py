@@ -3,7 +3,7 @@
 #########
 import argparse
 
-import file_utils
+from file_utils import messages_generator_from_file, write_messages_to_json
 
 ######
 #ARGS#
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     pasta_set = set()
     lost = 0
 
-    for message in file_utils.messages_generator_from_file(args.src, args.debug):
+    for message in messages_generator_from_file(args.src, args.debug):
         if message.is_readable():
             if message.is_copypasta():
                 pasta_set.add(message.text)
@@ -48,4 +48,4 @@ if __name__ == "__main__":
         print(
             f"we didn't read {lost} of the messagesand {len(pasta_set)} of them were copypastas")
 
-    file_utils.write_messages_to_json(args.out, pasta_set)
+    write_messages_to_json(args.out, pasta_set)

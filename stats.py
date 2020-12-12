@@ -63,11 +63,6 @@ def order_stats_by_cp(stat_dict: Dict[str, Dict[bool, int]], copypasta: bool) ->
     yield from sorted_stats(copypasta_stat_dict)
 
 
-def write_messages_to_json(filename, messages) -> None:
-    with open(filename, "w", encoding="utf-8") as out:
-        out.write(json.dumps(list(messages), indent=2, ensure_ascii=False))
-
-
 def raw_ratios(placement, num, ratio) -> str:
     return f"{placement}: {num} with a ratio of {ratio} copypastas to regular messages\n"
 

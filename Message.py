@@ -13,10 +13,10 @@ class Message(object):
             return None, None, message
 
     def __init__(self, message):
-        self.date_and_time, self.num, self.text = message.parse(message)
+        self.date_and_time, self.num, self.text = Message.parse(message)
 
     def is_copypasta(self):
-        return len(self) > 400 or len(self.text)
+        return len(self) > 100 or len(self.text) > 400
 
     def is_readable(self):
         return self.num is not None

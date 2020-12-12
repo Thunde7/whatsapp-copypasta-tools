@@ -1,21 +1,14 @@
 #########
 #IMPORTS#
 #########
-from typing import Generator, List
+from typing import Iterator, List
 import json
 import re
 
-from message import Message
+from Message import Message
 
 message_RE = re.compile(
-    r"""
-    (\d{1,2} #day or month
-    [- . /]  #seperator
-    \d{1,2}  #month or day
-    [- . /]  #seperator
-    \d{1,2}.*?) #year
-    (?=^^(\d{1,2}[- . /]\d{1,2}[- . /]\d{1,2}|\Z))""",
-    re.S | re.M)
+    r"(\d{1,2}[- . /]\d{1,2}[- . /]\d{1,2}.*?)(?=^^(\d{1,2}[- . /]\d{1,2}[- . /]\d{1,2}|\Z))", re.S | re.M)
 # TODO
 # EMOJI_RE = re.compile(r'\d+(.*?)[\u263a-\U0001f645]')
 
@@ -23,7 +16,7 @@ message_RE = re.compile(
 ###########
 #FUNCTIONS#
 ###########
-def messages_generator_from_file(filename: str, debug: bool) -> Generator[Message]:
+def messages_generator_from_file(filename: str, debug: bool) -> Iterator[Message]:
     try:
         with open(filename, "r", encoding="utf-8") as input:
             messages = [m.group(1).strip()
@@ -37,6 +30,7 @@ def messages_generator_from_file(filename: str, debug: bool) -> Generator[Messag
 
     for message in messages:
         yield Message(message)
+    
 
 
 def read_from_json(dir: str) -> List[str]:
@@ -57,3 +51,8 @@ def read_from_text(dir) -> List[str]:
     except FileNotFoundError:
         print(f"trouble reading from {dir}")
     return data.split()
+
+
+def write_messages_to_json(filename, messages) -> None:
+    with open(filename, "w", encoding="utf-8") as out:
+        out.write(json.dumps(list(messages), indent=2, ensure_ascii=False))
