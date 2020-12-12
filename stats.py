@@ -1,7 +1,7 @@
 #########
 #IMPORTS#
 #########
-from typing import Dict, List
+from typing import Dict, Iterator, List, Tuple
 import json
 import argparse
 
@@ -34,6 +34,7 @@ parser.add_argument(
 #FUNCTIONS#
 ###########
 
+
 def add_to_stats(stat_dict: Dict[str, Dict[bool, int]],
                  message: Message) -> None:
     if message.num not in stat_dict:
@@ -44,23 +45,29 @@ def add_to_stats(stat_dict: Dict[str, Dict[bool, int]],
 def stat_to_ratio(x, y): return x / y if y != 0 else x
 
 
-def sorted_stats(stat_list: List[tuple[str, float]]) -> List[tuple[int, tuple[str, float]]]:
+def sorted_stats(stat_list: List[Tuple[str, float]]) -> List[Tuple[int, Tuple[str, float]]]:
     return enumerate(sorted(stat_list, reverse=True, key=lambda item: item[1]))
 
 
-def ratios_from_stats(stat_dict: Dict[str, Dict[bool, int]]) -> List[tuple[int, tuple[str, float]]]:
-    ratio_dict = {}
+def ratios_from_stats(stat_dict: Dict[str, Dict[bool, int]]) -> Iterator[Tuple[int, Tuple[str, float]]]:
+    ratio_list = []
     for num, copypasta_count_dict in stat_dict.items():
-        ratio_dict[num] = stat_to_ratio(
-            copypasta_count_dict[True], copypasta_count_dict[False])
-    yield from sorted_stats(ratio_dict)
+        ratio_list.append(
+            (num, 
+            stat_to_ratio(copypasta_count_dict[True],
+                          copypasta_count_dict[False]))
+        )
+    yield from sorted_stats(ratio_list)
 
 
-def order_stats_by_cp(stat_dict: Dict[str, Dict[bool, int]], copypasta: bool) -> list[tuple[int, tuple[str, float]]]:
-    copypasta_stat_dict = {}
-    for num, copypasta_cout_dict in stat_dict.items():
-        copypasta_cout_dict[num] = copypasta_cout_dict[copypasta]
-    yield from sorted_stats(copypasta_stat_dict)
+def order_stats_by_cp(stat_dict: Dict[str, Dict[bool, int]], is_copypasta: bool) -> Iterator[Tuple[int, Tuple[str, float]]]:
+    copypasta_count_list = []
+    for num, copypasta_count_dict in stat_dict.items():
+        copypasta_count_list.append(
+            (num,
+            copypasta_count_dict[is_copypasta])
+        )
+    yield from sorted_stats(copypasta_count_list)
 
 
 def raw_ratios(placement, num, ratio) -> str:
@@ -73,16 +80,16 @@ def raw_copypasta(placment, num, amount, type) -> str:
 
 def write_all_stats(stat_dict) -> None:
     with open("leaderboard.txt", "w", encoding="utf-8") as out:
-        for place, num, ratio in ratios_from_stats(stat_dict):
+        for place, (num, ratio) in ratios_from_stats(stat_dict):
             out.write(raw_ratios(place + 1, num, ratio))
 
     with open("most_copypastas.txt", "w", encoding="utf-8") as out:
-        for place, num, cp_amount in order_stats_by_cp(stat_dict, True):
+        for place, (num, cp_amount) in order_stats_by_cp(stat_dict, True):
             out.write(raw_copypasta(place + 1, num, cp_amount, True))
 
     with open("most_non_copypastas.txt", "w", encoding="utf-8") as out:
-        for place, num, cp_amount in order_stats_by_cp(stat_dict, False):
-            out.write(raw_copypasta(place + 1, num, cp_amount, False))
+        for place, (num, ncp_amount) in order_stats_by_cp(stat_dict, False):
+            out.write(raw_copypasta(place + 1, num, ncp_amount, False))
 
 
 if __name__ == "__main__":
