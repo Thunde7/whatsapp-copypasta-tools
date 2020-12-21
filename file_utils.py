@@ -30,7 +30,6 @@ def messages_generator_from_file(filename: str, debug: bool) -> Iterator[Message
 
     for message in messages:
         yield Message(message)
-    
 
 
 def read_from_json(dir: str) -> List[str]:
