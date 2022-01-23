@@ -1,105 +1,128 @@
-#########
-#IMPORTS#
-#########
-from typing import Dict, Iterator, List, Tuple
-import json
+'''
+Stats module
+'''
+
+###########
+# IMPORTS #
+###########
+from dataclasses import dataclass
+from typing import Dict, Generator, List, Tuple
 import argparse
 
-from Message import Message
+from message import Message
 from file_utils import messages_generator_from_file
 
-######
-#ARGS#
-######
-parser = argparse.ArgumentParser(
-    description='stats module',
-    usage='python stats.py INPUT [-d]'
-)
+################
+# Number Class #
+################
 
-parser.add_argument(
-    "src",
-    metavar="INPUT",
-    help="the exported file from whatsapp"
-)
+@dataclass(order=True)
+class Number():
+    mobile: str
+    copypastas: int = 0
+    spam: int = 0
 
-parser.add_argument(
-    "-d",
-    "--debug",
-    required=False,
-    action='store_true',
-    help="DEBUG mode, Enables prints"
-)
+    @property
+    def ratio(self) -> float:
+        '''returns the ratio of spam to copypastas'''
+        return self.copypastas / self.spam
+    
+    @property
+    def ratio_str(self) -> str:
+        '''returns a string with the raw ratio'''
+        return f"{self.mobile} with a ratio of {self.ratio} copypastas to regular messages\n"
 
-###########
-#FUNCTIONS#
-###########
+    def copypasta_str(self, pasta: bool = True) -> str:
+        '''returns a string with the raw copypasta count'''
+        return f"{self.mobile} has {self.copypastas} copypastas\n" if pasta else \
+                f"{self.mobile} has {self.spam} spam messages\n"
 
 
-def add_to_stats(stat_dict: Dict[str, Dict[bool, int]],
+########
+# ARGS #
+########
+
+def parse_args() -> argparse.Namespace:
+    '''parses the args'''
+    parser = argparse.ArgumentParser(
+        description='stats module',
+        usage='python stats.py INPUT [-d]'
+    )
+
+    parser.add_argument(
+        "src",
+        metavar="INPUT",
+        help="the exported file from whatsapp"
+    )
+
+    parser.add_argument(
+        "-d",
+        "--debug",
+        required=False,
+        action='store_true',
+        help="DEBUG mode, Enables prints"
+    )
+
+    return parser.parse_args()
+
+#############
+# FUNCTIONS #
+#############
+
+
+def add_to_stats(stat_dict: Dict[str, Number],
                  message: Message) -> None:
-    if message.num not in stat_dict:
-        stat_dict[message.num] = {True: 0, False: 0}
-    stat_dict[message.num][message.is_copypasta()] += 1
+    '''
+    adds a message to the stats dict
+    '''
+    if message.is_copypasta:
+        stat_dict[message.sender].copypastas += 1
+    else:
+        stat_dict[message.sender].spam += 1
 
 
-def stat_to_ratio(x, y): return x / y if y != 0 else x
+def sorted_stats(stat_list: List[Number]) -> \
+        Generator[Tuple[int, Number], None, None]:
+    '''sorts and returns the stats in a enumerated list'''
+    yield from enumerate(sorted(stat_list, reverse=True, key=lambda number: number.ratio))
 
 
-def sorted_stats(stat_list: List[Tuple[str, float]]) -> List[Tuple[int, Tuple[str, float]]]:
-    return enumerate(sorted(stat_list, reverse=True, key=lambda item: item[1]))
+
+def write_all_stats(stat_dict: Dict[str, Number],
+                    leaderboard_file: str = "leaderboard.txt",
+                    most_cp_file: str = "most_copypastas.txt",
+                    most_spam_file: str = "most_non_copypastas.txt"
+                    ) -> None:
+    '''
+    writes all the stats to the a file
+    '''
+    with open(leaderboard_file, "w", encoding="utf-8") as out:
+        number_list = list(stat_dict.values())
+        for place, number in enumerate(sorted(number_list, reverse=True,
+                                        key=lambda number: number.ratio), 1):
+            out.write(f"{place=} : {number.ratio_str}")
+
+    with open(most_cp_file, "w", encoding="utf-8") as out:
+        for place, number in enumerate(sorted(number_list, reverse=True,
+                                        key=lambda number: number.copypastas), 1):
+            out.write(f"{place=} : {number.copypasta_str()}")
+
+    with open(most_spam_file, "w", encoding="utf-8") as out:
+        for place, number in enumerate(sorted(number_list, reverse=True,
+                                        key=lambda number: number.spam), 1):
+            out.write(f"{place=} : {number.copypasta_str(pasta=False)}")
 
 
-def ratios_from_stats(stat_dict: Dict[str, Dict[bool, int]]) -> Iterator[Tuple[int, Tuple[str, float]]]:
-    ratio_list = []
-    for num, copypasta_count_dict in stat_dict.items():
-        ratio_list.append(
-            (num, 
-            stat_to_ratio(copypasta_count_dict[True],
-                          copypasta_count_dict[False]))
-        )
-    yield from sorted_stats(ratio_list)
+def main() -> None:
+    '''main function'''
+    args: argparse.Namespace = parse_args()
 
+    lost: int = 0
+    pastas: int = 0
 
-def order_stats_by_cp(stat_dict: Dict[str, Dict[bool, int]], is_copypasta: bool) -> Iterator[Tuple[int, Tuple[str, float]]]:
-    copypasta_count_list = []
-    for num, copypasta_count_dict in stat_dict.items():
-        copypasta_count_list.append(
-            (num,
-            copypasta_count_dict[is_copypasta])
-        )
-    yield from sorted_stats(copypasta_count_list)
-
-
-def raw_ratios(placement, num, ratio) -> str:
-    return f"{placement}: {num} with a ratio of {ratio} copypastas to regular messages\n"
-
-
-def raw_copypasta(placment, num, amount, type) -> str:
-    return f"{placment}: {num} with {amount} {type} copypastas\n"
-
-
-def write_all_stats(stat_dict) -> None:
-    with open("leaderboard.txt", "w", encoding="utf-8") as out:
-        for place, (num, ratio) in ratios_from_stats(stat_dict):
-            out.write(raw_ratios(place + 1, num, ratio))
-
-    with open("most_copypastas.txt", "w", encoding="utf-8") as out:
-        for place, (num, cp_amount) in order_stats_by_cp(stat_dict, True):
-            out.write(raw_copypasta(place + 1, num, cp_amount, True))
-
-    with open("most_non_copypastas.txt", "w", encoding="utf-8") as out:
-        for place, (num, ncp_amount) in order_stats_by_cp(stat_dict, False):
-            out.write(raw_copypasta(place + 1, num, ncp_amount, False))
-
-
-if __name__ == "__main__":
-    args = parser.parse_args()
-    lost = 0
-    pastas = 0
-
-    stat_dict = dict()
+    stat_dict: Dict[str, Number] = {}
     for message in messages_generator_from_file(args.src, args.debug):
-        if message.is_readable():
+        if message.is_readable:
             add_to_stats(stat_dict, message)
             if message.is_copypasta:
                 pastas += 1
@@ -111,3 +134,7 @@ if __name__ == "__main__":
             f"we didn't read {lost} of the messages and {pastas} of them were copypastas")
 
     write_all_stats(stat_dict)
+
+
+if __name__ == "__main__":
+    main()
