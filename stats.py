@@ -75,6 +75,8 @@ def add_to_stats(stat_dict: Dict[str, Number],
     '''
     adds a message to the stats dict
     '''
+    if message.sender not in stat_dict:
+        stat_dict[message.sender] = Number(message.sender)
     if message.is_copypasta:
         stat_dict[message.sender].copypastas += 1
     else:
