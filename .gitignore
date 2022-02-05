@@ -7,3 +7,4 @@ __pycache__/*
 selenium/*
 drivers/
 rest.py
+.env
