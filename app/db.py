@@ -212,18 +212,18 @@ class TablePastas(DbTable):
     dbname = "Pastas"
     objType = Pasta
 
-    def fuzzy_search(self, subtext: str):
+    def search(self, subtext: str, amount: int = 10):
         """
         Fuzzy search for the pastas that contain the subtext
         """
         try:
             with self.store.open_session() as session:
                 query = session.query.search('text', subtext)
-                return list(query) if query else None
+                return list(query)[:amount] if query else None
         except IndexError:
             return None
         except (InvalidOperationException, NotSupportedException, ValueError) as exc:
-            logging.exception("get unfinished by rater error - %s", exc)
+            logging.exception("Search failed - %s", exc)
             return None
 
 
@@ -246,7 +246,7 @@ class TableUsers(DbTable):
         except IndexError:
             return None
         except (InvalidOperationException, NotSupportedException, ValueError) as exc:
-            logging.exception("get unfinished by rater error - %s", exc)
+            logging.exception("Sent by %s error - %s", number, exc)
             return None
 
 
@@ -256,3 +256,17 @@ class TableResults(DbTable):
     """
     dbname = "Cache"
     objType = Result
+    def search(self, subtext: str, amount: int = 10):
+        """
+        Fuzzy search for the pastas that contain the subtext
+        """
+        try:
+            with self.store.open_session() as session:
+                query = session.query.where_equals('query', subtext)
+                return list(query)[:amount] if query else None
+        except IndexError:
+            return None
+        except (InvalidOperationException, NotSupportedException, ValueError) as exc:
+            logging.exception("Search failed - %s", exc)
+            return None
+
