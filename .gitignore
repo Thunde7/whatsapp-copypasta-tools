@@ -1,5 +1,4 @@
 *.json
-*.txt
 *.old
 *.log
 data/*

@@ -1,0 +1,3 @@
+pyravendb==5.0.0.3
+fastapi>=0.69
+uvicorn>=0.17
