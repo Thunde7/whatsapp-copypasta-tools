@@ -4,6 +4,7 @@ Database module
 import json
 import logging
 import os
+from typing import Dict
 from pyravendb.store import document_store
 from pyravendb.changes.observers import ActionObserver
 from pyravendb.custom_exceptions.exceptions import InvalidOperationException, NotSupportedException
@@ -14,7 +15,6 @@ from pyravendb.custom_exceptions.exceptions import InvalidOperationException, No
 CERT_FILE = os.path.join(os.getcwd(), os.environ.get("DB_CERT_PATH", ""))
 KEY_FILE = os.path.join(os.getcwd(), os.environ.get("DB_KEY_PATH", ""))
 DB_URL = os.environ.get("DB_URL", 'https://127.0.0.1')
-COMMON_DATE_FORMAT = "%Y-%m-%d_%H-%M"
 
 # ================================================================================
 
@@ -50,7 +50,7 @@ class DbDocument:
                 data = data.__dict__
             except AttributeError as exc:
                 raise Exception("can only proces dictionaties and raven docs") from exc
-        for key, val in data.items:
+        for key, val in data.items():
             setattr(self, key, val)
 
     def dump(self):
@@ -137,8 +137,8 @@ class DbTable:
         Get all the documents in the table
         """
         with self.store.open_session() as session:
-            query_result = list(session.query)
-            result = self.add_ids(query_result, session)
+            query_result = list(session.query())
+            result = DbTable.add_ids(query_result, session)
         return result
 
     def get_by_id(self, _id):
@@ -179,6 +179,17 @@ class DbTable:
             session.save_changes()
             return session.advanced.get_document_id(obj)
 
+    def mass_create(self, data: Dict[str, Dict[str, str]]):
+        """
+        Create a list of documents
+        """
+        with self.store.open_session() as session:
+            for _id, doc in data.items():
+                obj = self.objType()
+                obj.update(doc)
+                session.store(obj, key=_id)
+            session.save_changes()
+
     def update(self, data, _id):
         """
         Update a document
@@ -209,7 +220,7 @@ class TablePastas(DbTable):
     CopyPastas Table
     """
 
-    dbname = "Pastas"
+    dbname = "Copypastas"
     objType = Pasta
 
     def search(self, subtext: str, amount: int = 10):
@@ -218,22 +229,13 @@ class TablePastas(DbTable):
         """
         try:
             with self.store.open_session() as session:
-                query = session.query.search('text', subtext)
-                return list(query)[:amount] if query else None
+                query = session.query().search('text', subtext)
+                return [message.get('text') for message in query][:amount] if query else None
         except IndexError:
             return None
         except (InvalidOperationException, NotSupportedException, ValueError) as exc:
             logging.exception("Search failed - %s", exc)
             return None
-
-
-class TableUsers(DbTable):
-    """
-    Users Table
-    """
-
-    dbname = "Stats"
-    objType = User
 
     def get_sent_by(self, number: str):
         """
@@ -241,7 +243,7 @@ class TableUsers(DbTable):
         """
         try:
             with self.store.open_session() as session:
-                query = session.query.where_equals('number', number)
+                query = session.query().where_equals('number', number)
                 return list(query) if query else None
         except IndexError:
             return None
@@ -250,11 +252,20 @@ class TableUsers(DbTable):
             return None
 
 
+class TableUsers(DbTable):
+    """
+    Users Table
+    """
+
+    dbname = "Copypastas"
+    objType = User
+
 class TableResults(DbTable):
     """
     Search Results cache Table
     """
-    dbname = "Cache"
+
+    dbname = "Copypastas"
     objType = Result
     def search(self, subtext: str, amount: int = 10):
         """
@@ -262,11 +273,10 @@ class TableResults(DbTable):
         """
         try:
             with self.store.open_session() as session:
-                query = session.query.where_equals('query', subtext)
+                query = session.query().where_equals('query', subtext)
                 return list(query)[:amount] if query else None
         except IndexError:
             return None
         except (InvalidOperationException, NotSupportedException, ValueError) as exc:
             logging.exception("Search failed - %s", exc)
             return None
-

@@ -6,7 +6,7 @@ Some file utils
 # IMPORTS #
 ###########
 
-from typing import Generator, List
+from typing import Iterator, List
 import json
 import re
 
@@ -23,7 +23,7 @@ message_RE = re.compile(
 # FUNCTIONS #
 #############
 
-def messages_generator_from_file(filename: str, debug: bool) -> Generator[Message, None, None]:
+def messages_generator_from_file(filename: str, debug: bool) -> Iterator[Message]:
     '''
     Generator that yields messages from a file
     '''
