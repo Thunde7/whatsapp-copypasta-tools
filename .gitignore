@@ -1,14 +1,23 @@
+# Data related files
+data/*
 *.json
 *.old
 *.log
-data/*
+
+# Spammer module related files
+drivers/
+selenium/*
+
+# Python bytecode
 __pycache__/*
 */__pycache__/*
-selenium/*
-drivers/
-rest.py
-.env
-venv/*
+
+# Raven related files
 certs/*
 topology_files
+
+# User-specific files
 *.ps1
+venv/*
+.env
+manual_upload.py
