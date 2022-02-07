@@ -10,3 +10,6 @@ drivers/
 rest.py
 .env
 venv/*
+certs/*
+topology_files
+*.ps1

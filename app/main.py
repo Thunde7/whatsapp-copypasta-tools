@@ -48,7 +48,7 @@ async def stats(number: str):
     """
     Get the stats for the user with the number.
     """
-    with db.TableUsers() as table:
+    with db.TablePastas() as table:
         result = table.get_sent_by(number)
     if not result:
         return {"error": "No results found."}, 404
